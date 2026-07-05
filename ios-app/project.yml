@@ -15,6 +15,9 @@ options:
   deploymentTarget:
     iOS: "16.0"
   createIntermediateGroups: true
+  # Xcode-15-kompatibles Projektformat erzwingen (Standard von XcodeGen ist 77 =
+  # Xcode 16 und lässt sich von älteren Xcode-Versionen auf CI nicht öffnen).
+  objectVersion: 56
 
 settings:
   base:
