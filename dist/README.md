@@ -17,6 +17,5 @@ mit deiner eigenen Apple-ID:
 
 Läuft mit kostenloser Apple-ID 7 Tage, danach neu signieren.
 
-> Hinweis: Aktuell ist das Kamera-Live-Video noch ein Platzhalter (MobileVLCKit
-> für RTSP ist noch nicht eingebunden). Netzwerk-Scan, Router-Anbindung und
-> PC-Fernsteuerung funktionieren.
+> Kamera-Live-Video (RTSP) läuft echt inkl. Ton über MobileVLCKit. Netzwerk-Scan,
+> Router-Anbindung und PC-Fernsteuerung funktionieren ebenfalls.

@@ -1,12 +1,10 @@
 import SwiftUI
 
-/// Live-Ansicht einer Kamera: Video, Ton, Gegensprechen und PTZ-Steuerung.
+/// Live-Ansicht einer Kamera: echtes Video, Ton, Gegensprechen und PTZ.
 struct CameraPlayerView: View {
     let camera: Camera
 
-    @State private var player: StreamPlayer = VLCStreamPlayer()
-    @State private var muted = false
-    @State private var talking = false
+    @StateObject private var stream = CameraStreamController()
 
     var body: some View {
         ZStack {
@@ -18,31 +16,40 @@ struct CameraPlayerView: View {
         }
         .navigationTitle(camera.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            if let url = camera.mainStreamURL { player.play(url: url) }
-        }
-        .onDisappear {
-            player.stop()
-            if talking { player.stopTalkBack() }
-        }
+        .onDisappear { stream.stop() }
     }
 
     private var videoSurface: some View {
         ZStack {
-            // Hier rendert MobileVLCKit sein Video-Layer (UIViewRepresentable).
-            Rectangle().fill(Theme.eventHorizon)
-            if camera.mainStreamURL == nil {
+            if let url = camera.mainStreamURL {
+                // Echte VLC-Wiedergabe (RTSP inkl. Audio).
+                CameraVideoSurface(controller: stream, url: url)
+            } else {
+                Rectangle().fill(Theme.eventHorizon)
                 Text("Keine Stream-URL – erst per ONVIF verbinden.")
                     .foregroundStyle(Theme.textSecondary)
-            } else {
+            }
+
+            if stream.isBuffering {
                 VStack(spacing: 8) {
-                    Image(systemName: "video.fill").font(.largeTitle).foregroundStyle(Theme.accent)
-                    Text("Live-Stream").foregroundStyle(Theme.textSecondary)
-                    Text(camera.mainStreamURL!.absoluteString)
-                        .font(.caption2).foregroundStyle(Theme.textFaint)
-                        .lineLimit(1).truncationMode(.middle).padding(.horizontal)
+                    ProgressView().tint(.white)
+                    Text(stream.statusText).font(.caption).foregroundStyle(.white.opacity(0.8))
                 }
             }
+
+            // Status-Badge oben links.
+            VStack {
+                HStack {
+                    Label(stream.statusText, systemImage: stream.isPlaying ? "dot.radiowaves.left.and.right" : "wifi.slash")
+                        .font(.caption2.bold())
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(.black.opacity(0.5), in: Capsule())
+                        .foregroundStyle(stream.isPlaying ? Theme.success : Theme.warning)
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding(8)
         }
         .frame(maxWidth: .infinity)
         .aspectRatio(16.0/9.0, contentMode: .fit)
@@ -51,20 +58,18 @@ struct CameraPlayerView: View {
     private var controls: some View {
         VStack(spacing: 16) {
             HStack(spacing: 24) {
-                controlButton(muted ? "speaker.slash.fill" : "speaker.wave.2.fill", "Ton") {
-                    muted.toggle(); player.setMuted(muted)
+                controlButton(stream.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", "Ton") {
+                    stream.toggleMuted()
                 }
                 if camera.hasTwoWayAudio {
-                    controlButton(talking ? "mic.fill" : "mic", "Sprechen", active: talking) {
-                        toggleTalk()
+                    controlButton(stream.isTalking ? "mic.fill" : "mic", "Sprechen", active: stream.isTalking) {
+                        stream.isTalking ? stream.stopTalkBack() : stream.startTalkBack()
                     }
                 }
-                controlButton("camera.fill", "Foto") { /* Snapshot speichern */ }
+                controlButton("camera.fill", "Foto") { stream.snapshot() }
             }
 
-            if camera.hasPTZ {
-                ptzPad
-            }
+            if camera.hasPTZ { ptzPad }
         }
         .padding()
         .frame(maxWidth: .infinity)
@@ -110,15 +115,6 @@ struct CameraPlayerView: View {
             .foregroundStyle(active ? Theme.accent : Theme.textPrimary)
             .frame(width: 64, height: 60)
             .background(RoundedRectangle(cornerRadius: 12).fill(Theme.accretion))
-        }
-    }
-
-    private func toggleTalk() {
-        talking.toggle()
-        do {
-            if talking { try player.startTalkBack() } else { player.stopTalkBack() }
-        } catch {
-            talking = false
         }
     }
 

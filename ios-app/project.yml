@@ -6,10 +6,17 @@
 #   brew install xcodegen
 #   cd ios-app && xcodegen generate && open Blackhole.xcodeproj
 #
-# Für echte RTSP-Wiedergabe zusätzlich das Swift-Package MobileVLCKit einbinden
-# (siehe VideoStreaming.swift). Danach in Xcode signieren und auf ein iPhone laden.
+# RTSP-Wiedergabe (Kamera-Bild + Ton) läuft über MobileVLCKit, hier als
+# Swift-Package VLCKitSPM eingebunden (siehe Features/Cameras/VideoStreaming.swift).
 
 name: Blackhole
+
+# MobileVLCKit als Swift-Package: liefert die RTSP-/H.264-/H.265-Wiedergabe
+# inklusive Audio, die der iOS-eigene AVPlayer nicht kann.
+packages:
+  VLCKitSPM:
+    url: https://github.com/tylerjonesio/vlckit-spm
+    from: "3.6.0"
 options:
   bundleIdPrefix: dev.badhabs.blackhole
   deploymentTarget:
@@ -39,10 +46,6 @@ targets:
       base:
         INFOPLIST_FILE: Blackhole/Resources/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: dev.badhabs.blackhole
-    # Für RTSP: hier das VLCKit-Package als Abhängigkeit ergänzen, z.B.
-    # dependencies:
-    #   - package: MobileVLCKit
-    # packages:
-    #   MobileVLCKit:
-    #     url: https://github.com/tigerpixel/MobileVLCKit-SPM
-    #     from: 3.5.1
+    dependencies:
+      - package: VLCKitSPM
+        product: VLCKitSPM
