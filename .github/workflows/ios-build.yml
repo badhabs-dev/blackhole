@@ -83,10 +83,11 @@ jobs:
           cp ios-app/Blackhole-unsigned.ipa dist/Blackhole-unsigned.ipa
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet -- dist/; then
+          git add dist/Blackhole-unsigned.ipa
+          # --cached prüfen, damit auch eine noch nicht getrackte neue Datei erkannt wird.
+          if git diff --cached --quiet; then
             echo "Keine Änderung an der .ipa – nichts zu committen."
             exit 0
           fi
-          git add dist/Blackhole-unsigned.ipa
           git commit -m "CI: build artifact .ipa aktualisieren [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"
