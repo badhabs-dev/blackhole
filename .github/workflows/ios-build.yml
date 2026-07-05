@@ -14,6 +14,9 @@ on:
       - ".github/workflows/ios-build.yml"
   workflow_dispatch:   # erlaubt manuelles Auslösen im Actions-Tab
 
+permissions:
+  contents: write        # nötig, damit der Build die .ipa in den Branch committen darf
+
 jobs:
   build:
     runs-on: macos-14
@@ -68,3 +71,22 @@ jobs:
           name: Blackhole-unsigned-ipa
           path: ios-app/Blackhole-unsigned.ipa
           if-no-files-found: error
+
+      # Legt die fertige .ipa zusätzlich direkt in den Branch (Ordner dist/),
+      # damit sie ohne Umweg über den Actions-Tab heruntergeladen werden kann.
+      # Änderungen an dist/ lösen den Workflow NICHT erneut aus (Trigger-Pfade
+      # sind nur ios-app/** und die Workflow-Datei) -> keine Endlosschleife.
+      - name: .ipa in den Branch committen
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p dist
+          cp ios-app/Blackhole-unsigned.ipa dist/Blackhole-unsigned.ipa
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- dist/; then
+            echo "Keine Änderung an der .ipa – nichts zu committen."
+            exit 0
+          fi
+          git add dist/Blackhole-unsigned.ipa
+          git commit -m "CI: build artifact .ipa aktualisieren [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
