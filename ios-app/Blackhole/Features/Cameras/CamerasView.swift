@@ -76,7 +76,7 @@ struct CamerasView: View {
                         manualHost = ""; manualName = ""; showAdd = false
                     }.disabled(manualHost.isEmpty)
                 }
-                ToolbarItem(placement: .cancelAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { showAdd = false }
                 }
             }

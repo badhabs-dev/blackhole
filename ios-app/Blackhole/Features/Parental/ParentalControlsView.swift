@@ -131,7 +131,7 @@ struct PolicyEditorView: View {
                         onSave(policy); dismiss()
                     }
                 }
-                ToolbarItem(placement: .cancelAction) { Button("Abbrechen") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Abbrechen") { dismiss() } }
             }
         }
     }

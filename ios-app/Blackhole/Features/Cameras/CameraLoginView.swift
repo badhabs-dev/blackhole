@@ -52,7 +52,13 @@ struct CameraLoginView: View {
         }
         .navigationTitle("Kamera-Login")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(item: $connected) { CameraPlayerView(camera: $0) }
+        // iOS-16-kompatibel (navigationDestination(item:) wäre erst iOS 17).
+        .navigationDestination(isPresented: Binding(
+            get: { connected != nil },
+            set: { if !$0 { connected = nil } }
+        )) {
+            if let connected { CameraPlayerView(camera: connected) }
+        }
     }
 
     private func connect() async {

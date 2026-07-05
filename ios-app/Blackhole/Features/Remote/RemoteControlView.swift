@@ -97,7 +97,7 @@ struct RemoteControlView: View {
                         host = ""; showAdd = false
                     }.disabled(host.isEmpty)
                 }
-                ToolbarItem(placement: .cancelAction) { Button("Abbrechen") { showAdd = false } }
+                ToolbarItem(placement: .cancellationAction) { Button("Abbrechen") { showAdd = false } }
             }
         }
     }
@@ -132,7 +132,7 @@ private struct PairView: View {
             }
             .padding()
             .navigationTitle("Koppeln")
-            .toolbar { ToolbarItem(placement: .cancelAction) { Button("Abbrechen") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Abbrechen") { dismiss() } } }
         }
     }
 }

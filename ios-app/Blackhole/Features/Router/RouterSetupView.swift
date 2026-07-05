@@ -42,7 +42,7 @@ struct RouterSetupView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Verbinden") { connect() }.disabled(host.isEmpty)
                 }
-                ToolbarItem(placement: .cancelAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }
                 }
             }

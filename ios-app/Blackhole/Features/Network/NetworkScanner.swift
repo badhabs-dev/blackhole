@@ -100,7 +100,7 @@ final class NetworkScanner: ObservableObject {
         conn.start(queue: .global(qos: .utility))
     }
 
-    static func hostString(_ host: NWEndpoint.Host) -> String {
+    nonisolated static func hostString(_ host: NWEndpoint.Host) -> String {
         switch host {
         case .ipv4(let a): return "\(a)".components(separatedBy: "%").first ?? "\(a)"
         case .ipv6(let a): return "\(a)".components(separatedBy: "%").first ?? "\(a)"
