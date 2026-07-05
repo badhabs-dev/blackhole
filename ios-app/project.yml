@@ -1,0 +1,45 @@
+# XcodeGen-Projektdefinition.
+#
+# Erzeugt die Xcode-Projektdatei aus den Swift-Quellen. So muss die fehleranfällige
+# .pbxproj nicht von Hand gepflegt werden.
+#
+#   brew install xcodegen
+#   cd ios-app && xcodegen generate && open Blackhole.xcodeproj
+#
+# Für echte RTSP-Wiedergabe zusätzlich das Swift-Package MobileVLCKit einbinden
+# (siehe VideoStreaming.swift). Danach in Xcode signieren und auf ein iPhone laden.
+
+name: Blackhole
+options:
+  bundleIdPrefix: dev.badhabs.blackhole
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1"        # iPhone
+    GENERATE_INFOPLIST_FILE: NO
+
+targets:
+  Blackhole:
+    type: application
+    platform: iOS
+    sources:
+      - path: Blackhole
+    info:
+      path: Blackhole/Resources/Info.plist
+    settings:
+      base:
+        INFOPLIST_FILE: Blackhole/Resources/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: dev.badhabs.blackhole
+    # Für RTSP: hier das VLCKit-Package als Abhängigkeit ergänzen, z.B.
+    # dependencies:
+    #   - package: MobileVLCKit
+    # packages:
+    #   MobileVLCKit:
+    #     url: https://github.com/tigerpixel/MobileVLCKit-SPM
+    #     from: 3.5.1
