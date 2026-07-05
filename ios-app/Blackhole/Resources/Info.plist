@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>Blackhole</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>UILaunchScreen</key>
+    <dict/>
+
+    <!-- Local-Network-Zugriff (Scan, Bonjour, Kameras, Companion Agent) -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>Blackhole durchsucht dein WLAN nach Geräten, Kameras und Companion-Agents und kommuniziert direkt mit ihnen.</string>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_blackhole._tcp</string>
+        <string>_blackhole-agent._tcp</string>
+        <string>_rtsp._tcp</string>
+        <string>_onvif._tcp</string>
+        <string>_http._tcp</string>
+        <string>_https._tcp</string>
+        <string>_airplay._tcp</string>
+        <string>_raop._tcp</string>
+        <string>_googlecast._tcp</string>
+        <string>_ipp._tcp</string>
+        <string>_ipps._tcp</string>
+        <string>_pdl-datastream._tcp</string>
+        <string>_ssh._tcp</string>
+        <string>_smb._tcp</string>
+        <string>_afpovertcp._tcp</string>
+        <string>_rfb._tcp</string>
+        <string>_hap._tcp</string>
+        <string>_matter._tcp</string>
+        <string>_homekit._tcp</string>
+        <string>_workstation._tcp</string>
+        <string>_device-info._tcp</string>
+    </array>
+
+    <!-- Mikrofon für Kamera-Gegensprechen (Zwei-Wege-Audio) -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Für das Gegensprechen zu kompatiblen Kameras (Zwei-Wege-Audio).</string>
+    <!-- Foto speichern (Kamera-Snapshots) -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Zum Speichern von Kamera-Schnappschüssen in deiner Fotomediathek.</string>
+
+    <!-- Lokale HTTP-Verbindungen im WLAN (Kameras/Router/Agent nutzen meist http) -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+</dict>
+</plist>

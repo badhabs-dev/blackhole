@@ -1,0 +1,93 @@
+name: iOS Build (.ipa)
+
+# Baut die Blackhole-App auf einem macOS-Runner und legt eine UNSIGNIERTE
+# .ipa als Download-Artefakt ab. Diese .ipa installierst du mit Sideloadly
+# oder AltStore, die sie mit deiner eigenen Apple-ID signieren (kein Mac nötig).
+
+on:
+  push:
+    branches:
+      - "claude/**"
+      - main
+    paths:
+      - "ios-app/**"
+      - ".github/workflows/ios-build.yml"
+  workflow_dispatch:   # erlaubt manuelles Auslösen im Actions-Tab
+
+permissions:
+  contents: write        # nötig, damit der Build die .ipa in den Branch committen darf
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Neuesten Xcode auswählen
+        run: |
+          LATEST=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          echo "Nutze $LATEST"
+          sudo xcode-select -switch "$LATEST"
+          xcodebuild -version
+
+      - name: XcodeGen installieren
+        run: brew install xcodegen
+
+      - name: Xcode-Projekt erzeugen
+        working-directory: ios-app
+        run: xcodegen generate
+
+      - name: App bauen (ohne Signatur)
+        working-directory: ios-app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Blackhole.xcodeproj \
+            -scheme Blackhole \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: In .ipa verpacken
+        working-directory: ios-app
+        run: |
+          APP_PATH="build/Build/Products/Release-iphoneos/Blackhole.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Build-Produkt nicht gefunden unter $APP_PATH"; exit 1
+          fi
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -r Blackhole-unsigned.ipa Payload >/dev/null
+          echo "IPA erstellt:"; ls -lh Blackhole-unsigned.ipa
+
+      - name: .ipa als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: Blackhole-unsigned-ipa
+          path: ios-app/Blackhole-unsigned.ipa
+          if-no-files-found: error
+
+      # Legt die fertige .ipa zusätzlich direkt in den Branch (Ordner dist/),
+      # damit sie ohne Umweg über den Actions-Tab heruntergeladen werden kann.
+      # Änderungen an dist/ lösen den Workflow NICHT erneut aus (Trigger-Pfade
+      # sind nur ios-app/** und die Workflow-Datei) -> keine Endlosschleife.
+      - name: .ipa in den Branch committen
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p dist
+          cp ios-app/Blackhole-unsigned.ipa dist/Blackhole-unsigned.ipa
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dist/Blackhole-unsigned.ipa
+          # --cached prüfen, damit auch eine noch nicht getrackte neue Datei erkannt wird.
+          if git diff --cached --quiet; then
+            echo "Keine Änderung an der .ipa – nichts zu committen."
+            exit 0
+          fi
+          git commit -m "CI: build artifact .ipa aktualisieren [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

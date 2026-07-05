@@ -1,0 +1,5 @@
+# Optional – ohne diese Pakete laufen Kopplung + Dateibrowser trotzdem.
+mss             # Bildschirmaufnahme
+pillow          # JPEG-Kodierung
+opencv-python   # Webcam
+zeroconf        # Bonjour-Ankündigung (Auto-Discovery in der App)

@@ -1,0 +1,51 @@
+# XcodeGen-Projektdefinition.
+#
+# Erzeugt die Xcode-Projektdatei aus den Swift-Quellen. So muss die fehleranfällige
+# .pbxproj nicht von Hand gepflegt werden.
+#
+#   brew install xcodegen
+#   cd ios-app && xcodegen generate && open Blackhole.xcodeproj
+#
+# RTSP-Wiedergabe (Kamera-Bild + Ton) läuft über MobileVLCKit, hier als
+# Swift-Package VLCKitSPM eingebunden (siehe Features/Cameras/VideoStreaming.swift).
+
+name: Blackhole
+
+# MobileVLCKit als Swift-Package: liefert die RTSP-/H.264-/H.265-Wiedergabe
+# inklusive Audio, die der iOS-eigene AVPlayer nicht kann.
+packages:
+  VLCKitSPM:
+    url: https://github.com/tylerjonesio/vlckit-spm
+    from: "3.6.0"
+options:
+  bundleIdPrefix: dev.badhabs.blackhole
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  # Xcode-15-kompatibles Projektformat erzwingen (Standard von XcodeGen ist 77 =
+  # Xcode 16 und lässt sich von älteren Xcode-Versionen auf CI nicht öffnen).
+  objectVersion: 56
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1"        # iPhone
+    GENERATE_INFOPLIST_FILE: NO
+
+targets:
+  Blackhole:
+    type: application
+    platform: iOS
+    sources:
+      - path: Blackhole
+    info:
+      path: Blackhole/Resources/Info.plist
+    settings:
+      base:
+        INFOPLIST_FILE: Blackhole/Resources/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: dev.badhabs.blackhole
+    dependencies:
+      - package: VLCKitSPM
+        product: VLCKitSPM
